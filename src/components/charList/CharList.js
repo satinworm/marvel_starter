@@ -36,13 +36,13 @@ class CharList extends Component {
 		if (newCharList.length < 9) {
 			ended = true
 		}
-		
-		this.setState(({offset,  charList }) => ({
+
+		this.setState(({ offset, charList }) => ({
 			charList: [...charList, ...newCharList],
 			loading: false,
 			newItemLoading: false,
 			offset: offset + 9,
-			charEnded : ended
+			charEnded: ended,
 		}))
 	}
 
@@ -53,17 +53,43 @@ class CharList extends Component {
 		})
 	}
 
+	itemsRefs = []
+	setRef = (ref) => {
+		this.itemsRefs.push(ref)
+	}
+
+	focusOnItem = (id) => {
+		this.itemsRefs.forEach((item) => item.classList.remove("char__item_selected"))
+		this.itemsRefs[id].classList.add("char__item_selected")
+		this.itemsRefs[id].focus()
+	}
+
 	// Этот метод создан для оптимизации,
 	// чтобы не помещать такую конструкцию в метод render
 	renderItems(arr) {
-		const items = arr.map((item) => {
+		const items = arr.map((item, i) => {
 			let imgStyle = { objectFit: "cover" }
 			if (item.thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg") {
 				imgStyle = { objectFit: "unset" }
 			}
 
 			return (
-				<li className="char__item" key={item.id} onClick={() => this.props.onCharSelected(item.id)}>
+				<li
+					className="char__item"
+					tabIndex={0}
+					ref={this.setRef}
+					key={item.id}
+					onClick={() => {
+						this.props.onCharSelected(item.id)
+						this.focusOnItem(i)
+					}}
+					onKeyPress={(e, id) => {
+						if (e.key === " " || e.key === "Enter") {
+							this.props.onCharSelected(item, id)
+							this.focusOnItem(i)
+						}
+					}}
+				>
 					<img src={item.thumbnail} alt={item.name} style={imgStyle} />
 					<div className="char__name">{item.name}</div>
 				</li>
@@ -87,7 +113,12 @@ class CharList extends Component {
 				{errorMessage}
 				{spinner}
 				{content}
-				<button style={{'display' : charEnded ? 'none' : 'block'}} disabled={newItemLoading} onClick={() => this.onRequest(offset)} className="button button__main button__long">
+				<button
+					style={{ display: charEnded ? "none" : "block" }}
+					disabled={newItemLoading}
+					onClick={() => this.onRequest(offset)}
+					className="button button__main button__long"
+				>
 					<div className="inner">load more</div>
 				</button>
 			</div>

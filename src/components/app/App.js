@@ -1,39 +1,32 @@
-import AppHeader from "../appHeader/AppHeader"
-import RandomChar from "../randomChar/RandomChar"
-import CharList from "../charList/CharList"
-import CharInfo from "../charInfo/CharInfo"
-import { useState } from "react"
-import decoration from "../../resources/img/vision.png"
-import ErrorBoundary from "../errorBoundary/ErrorBoundary"
-import ComicsList from "../comicsList/ComicsList"
+import { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import AppHeader from "../appHeader/AppHeader";
+import Spinner from "../spinner/Spinner";
+// import { MainPage, ComicsPage, SingleComicPage } from "../pages";
+
+const Page404 = lazy(() => import('../pages/404'))
+const MainPage = lazy(() => import("../pages/MainPage"));
+const ComicsPage = lazy(() => import("../pages/ComicsPage"));
+const SingleComicPage = lazy(() => import("../pages/SingleComicPage"));
 
 const App = () => {
-	const [selectedChar, setChar] = useState(null)
+   return (
+      <Router>
+         <div className="app">
+            <AppHeader />
+            <main>
+               <Suspense fallback={<Spinner/>}>
+                  <Routes>
+                     <Route exact path="/" element={<MainPage />} />
+                     <Route exact path="/comics" element={<ComicsPage />} />
+                     <Route exact path="/comics/:comicId" element={<SingleComicPage />} />
+                     <Route path="*" element={<Page404 />} />
+                  </Routes>
+               </Suspense>
+            </main>
+         </div>
+      </Router>
+   );
+};
 
-	const onCharSelected = (id) => {
-		setChar(id)
-	}
-
-	return (
-		<div className="app">
-			<AppHeader />
-			<main>
-				{/* <ErrorBoundary>
-					<RandomChar />
-				</ErrorBoundary>
-				<div className="char__content">
-					<ErrorBoundary>
-						<CharList onCharSelected={onCharSelected} />
-					</ErrorBoundary>
-					<ErrorBoundary>
-						<CharInfo charId={selectedChar} />
-					</ErrorBoundary>
-				</div> */}
-				<ComicsList />
-				<img className="bg-decoration" src={decoration} alt="vision" />
-			</main>
-		</div>
-	)
-}
-
-export default App
+export default App;
